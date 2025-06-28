@@ -20,6 +20,7 @@ public class PostEntity {
             name = "id", columnDefinition = "BIGINT"))
     private PostId id;
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String body;
     private String author;
     private Integer wordCount;

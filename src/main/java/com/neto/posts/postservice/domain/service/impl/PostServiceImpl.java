@@ -9,6 +9,7 @@ import com.neto.posts.postservice.domain.model.PostEntity;
 import com.neto.posts.postservice.domain.model.PostId;
 import com.neto.posts.postservice.domain.repository.PostRepository;
 import com.neto.posts.postservice.domain.service.PostService;
+import com.neto.posts.postservice.util.TextUtils;
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.MessagePostProcessor;
@@ -18,11 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static com.neto.posts.postservice.infrastructure.rabbitmq.RabbitMQConfig.DIRECT_EXCHANGE_NAME;
 import static com.neto.posts.postservice.infrastructure.rabbitmq.RabbitMQConfig.ROUTING_KEY_PROCESS_POST;
@@ -82,33 +78,7 @@ public class PostServiceImpl implements PostService {
                 postEntity.getId().getValue(),
                 postEntity.getTitle(),
                 postEntity.getBody(),
-                this.getFirstThreeLines(postEntity.getBody()),
+                TextUtils.getFirstThreeSentences(postEntity.getBody()),
                 postEntity.getAuthor());
-    }
-
-    private String getFirstThreeLines(final String input) {
-        if (input == null || input.isEmpty()) {
-            return "";
-        }
-
-        final String[] lines = input.split("\\R");
-        return Arrays.stream(lines)
-                .limit(3)
-                .collect(Collectors.joining(System.lineSeparator()));
-    }
-
-    public static void main(String[] args) {
-        String basePath = "/search";
-        String jql = "xpto";
-        URI uri = UriComponentsBuilder
-                .fromPath(basePath)
-                .queryParam("fields", "key,summary")
-                .queryParam("maxResults", 5000)
-                .queryParam("startAt", 0)
-                .queryParam("jql", jql)
-                .build(true) // true = encode
-                .toUri();
-
-        System.out.println(uri.toString()); // /search?fields=key,summary&maxResults=5000&startAt=0&jql=" + jql
     }
 }
